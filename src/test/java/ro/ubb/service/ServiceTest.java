@@ -44,7 +44,7 @@ class ServiceTest {
 
     @BeforeEach
     void Setup() throws IOException {
-        var pw = new PrintWriter(STUDENTS_FILE);
+        PrintWriter pw = new PrintWriter(STUDENTS_FILE);
 
         pw.write(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
