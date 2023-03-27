@@ -193,6 +193,7 @@ public class MainTest
         assert errorLog.isEmpty();
     }
 
+    @Test
     void saveCorrectAssignment() {
         String id = "1";
         String description = "grade description";
@@ -202,6 +203,7 @@ public class MainTest
         assert result == 0;
     }
 
+    @Test
     void saveInvalidAssignment(){
         String id = "1";
         String description = "grade description";
