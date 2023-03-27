@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Entities>
+    <student ID="1">
+        <Nume> </Nume>
+        <Grupa>934</Grupa>
+    </student>
     <student ID="2">
-        <Nume>test</Nume>
+        <Nume>'</Nume>
+        <Grupa>934</Grupa>
+    </student>
+    <student ID="3">
+        <Nume>#</Nume>
+        <Grupa>934</Grupa>
+    </student>
+    <student ID="4">
+        <Nume>null</Nume>
+        <Grupa>934</Grupa>
+    </student>
+    <student ID="5">
+        <Nume>Student1</Nume>
         <Grupa>934</Grupa>
     </student>
 </Entities>

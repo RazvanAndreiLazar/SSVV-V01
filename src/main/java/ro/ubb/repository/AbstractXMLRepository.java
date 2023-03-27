@@ -29,6 +29,8 @@ public abstract class AbstractXMLRepository<ID, E extends HasID<ID>> extends Abs
 
     protected void loadFromXmlFile() {
         try {
+            entities.clear();
+
             Document XmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(XmlFilename);
             Element root = XmlDocument.getDocumentElement();
             NodeList list = root.getChildNodes();
@@ -72,9 +74,15 @@ public abstract class AbstractXMLRepository<ID, E extends HasID<ID>> extends Abs
     }
 
     @Override
+    public Iterable<E> findAll() {
+        loadFromXmlFile();
+        return super.findAll();
+    }
+
+    @Override
     public E save(E entity) throws ValidationException {
         E result = super.save(entity);
-        if (result == null) {
+        if (result != null) {
             writeToXmlFile();
         }
         return result;

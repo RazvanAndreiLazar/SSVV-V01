@@ -52,6 +52,8 @@ public class MainTest
                         "</Entities>");
 
         pw.close();
+
+        service.findAllStudents();
     }
 
     int countStudents(){
@@ -72,7 +74,7 @@ public class MainTest
         int ret = service.saveStudent("2", "test", 934);
         int studentsC = countStudents();
 
-        assert ret == 1;
+        assert ret == 0;
         assert initialStudentsC == studentsC - 1;
     }
 
@@ -134,7 +136,7 @@ public class MainTest
             ret = service.saveStudent(id, "test", 934);
             int studentsC = countStudents();
 
-            if(ret == 1 || initialStudentsC != studentsC){
+            if(ret == 1 || initialStudentsC == studentsC){
                 errorLog.add("Test failed for value " + id + "\n");
             }
         }
@@ -155,7 +157,7 @@ public class MainTest
             int studentsC = countStudents();
 
             id++;
-            if(ret == 1 || initialStudentsC != studentsC){
+            if(ret == 1 || initialStudentsC == studentsC){
                 errorLog.add("Test failed for value " + name + "\n");
             }
         }
@@ -184,7 +186,7 @@ public class MainTest
             ret = service.saveStudent(Integer.toString(id), "test", group);
 
             id++;
-            if(ret == 0){
+            if(ret == 1){
                 errorLog.add("Test failed for value " + group + "\n");
             }
         }
