@@ -16,6 +16,9 @@ import ro.ubb.validation.Validator;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -116,5 +119,75 @@ public class MainTest
 
         assert ret == 1;
         assert initialStudentsC == studentsC;
+    }
+
+    @Test
+    void testIdBoundryAddStudent(){
+        int initialStudentsC = countStudents();
+        List<String> idsToBeTested = new ArrayList<>(Arrays.asList(
+                " ","1.5", "abc", "null"
+        ));
+        List<String> errorLog = new ArrayList<>();
+        int ret;
+
+        for(String id : idsToBeTested){
+            ret = service.saveStudent(id, "test", 934);
+            int studentsC = countStudents();
+
+            if(ret == 1 || initialStudentsC != studentsC){
+                errorLog.add("Test failed for value " + id + "\n");
+            }
+        }
+        assert errorLog.isEmpty();
+    }
+
+    @Test
+    void testNameBoundryAddStudent(){
+        int initialStudentsC = countStudents();
+        List<String> namesToBeTested = new ArrayList<>(Arrays.asList(
+                " ","'", "#", "null", "Student1"
+        ));
+        List<String> errorLog = new ArrayList<>();
+        int ret;
+        int id = 1;
+        for(String name : namesToBeTested){
+            ret = service.saveStudent(Integer.toString(id), name, 934);
+            int studentsC = countStudents();
+
+            id++;
+            if(ret == 1 || initialStudentsC != studentsC){
+                errorLog.add("Test failed for value " + name + "\n");
+            }
+        }
+        assert errorLog.isEmpty();
+    }
+
+    @Test
+    void testGorupBoundryAddStudent(){
+        int initialStudentsC = countStudents();
+        List<Integer> negativeGroupsToBeTested = new ArrayList<>(Arrays.asList(110, 938));
+        List<Integer> positiveGroupsToBeTested = new ArrayList<>(Arrays.asList(111, 560, 937));
+        List<String> errorLog = new ArrayList<>();
+        int ret;
+        int id = 1;
+
+        for(Integer group : negativeGroupsToBeTested){
+            ret = service.saveStudent(Integer.toString(id), "test", group);
+
+            id++;
+            if(ret == 0){
+                errorLog.add("Test failed for value " + group + "\n");
+            }
+        }
+
+        for(Integer group : positiveGroupsToBeTested){
+            ret = service.saveStudent(Integer.toString(id), "test", group);
+
+            id++;
+            if(ret == 0){
+                errorLog.add("Test failed for value " + group + "\n");
+            }
+        }
+        assert errorLog.isEmpty();
     }
 }
