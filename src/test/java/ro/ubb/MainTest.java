@@ -192,4 +192,22 @@ public class MainTest
         }
         assert errorLog.isEmpty();
     }
+
+    void saveCorrectAssignment() {
+        String id = "1";
+        String description = "grade description";
+        int deadline = 5;
+        int startWeek = 4;
+        int result = service.saveAssignment(id, description, deadline, startWeek);
+        assert result == 0;
+    }
+
+    void saveInvalidAssignment(){
+        String id = "1";
+        String description = "grade description";
+        int deadline = 234;
+        int startWeek = 4;
+        int result = service.saveAssignment(id, description, deadline, startWeek);
+        assert result == 1;
+    }
 }
