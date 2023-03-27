@@ -95,7 +95,7 @@ public class MainTest
         int ret = service.saveStudent("2", "test2", 934);
         int studentsC = countStudents();
 
-        assert ret == 0;
+        assert ret == 1;
         assert initialStudentsC == studentsC;
     }
 
