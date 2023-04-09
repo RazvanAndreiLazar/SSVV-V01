@@ -119,7 +119,7 @@ public class AssignmentsTests {
         int initialAssignmentCount = countAssignments();
 
         String id = "3", description = "wt";
-        int startWeek = 16, deadline = 7;
+        int startWeek = -2, deadline = 7;
 
         int ret = service.saveAssignment(id, description, deadline, startWeek);
         int studentsC = countAssignments();
