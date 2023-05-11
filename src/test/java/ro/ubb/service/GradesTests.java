@@ -161,9 +161,9 @@ public class GradesTests {
         int studentsCount = countStudents();
         int assignmentCount = countAssignments();
 
-        assert  retAssignment == 0;
-        assert  retStudent == 0;
-        assert  retGrade == 0;
+        assert retAssignment == 0;
+        assert retStudent == 0;
+        assert retGrade == 0;
         assert initialAssignmentCount == assignmentCount -1;
         assert initialStudentsCount == studentsCount -1;
         assert initialGradeCount == gradeCount -1;

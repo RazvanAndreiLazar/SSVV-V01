@@ -1,40 +1,40 @@
-package ro.ubb.service;
+package ro.ubb.service.Mockito;
 
-import ro.ubb.domain.*;
-import ro.ubb.repository.*;
+import ro.ubb.domain.Assignment;
+import ro.ubb.domain.Grade;
+import ro.ubb.domain.Pair;
+import ro.ubb.domain.Student;
+import ro.ubb.repository.AssignmentXMLRepository;
+import ro.ubb.repository.GradeXMLRepository;
+import ro.ubb.repository.StudentXMLRepository;
+import ro.ubb.service.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.Locale;
 
-public class Service {
-    private final StudentXMLRepository studentXmlRepo;
-    private final AssignmentXMLRepository assignmentXmlRepo;
-    private final GradeXMLRepository gradeXmlRepo;
+public class Service_Mock {
+    private StudentXMLRepository studentXmlRepo;
+    private AssignmentXMLRepository assignmentXmlRepo;
+    private GradeXMLRepository gradeXmlRepo;
 
-    public Service(StudentXMLRepository studentXmlRepo, AssignmentXMLRepository assignmentXmlRepo, GradeXMLRepository gradeXmlRepo) {
+    private Service service;
+
+    public Service_Mock(Service service) {
+        this.service = service;
+    }
+
+    public Service_Mock(StudentXMLRepository studentXmlRepo, AssignmentXMLRepository assignmentXmlRepo, GradeXMLRepository gradeXmlRepo) {
         this.studentXmlRepo = studentXmlRepo;
         this.assignmentXmlRepo = assignmentXmlRepo;
         this.gradeXmlRepo = gradeXmlRepo;
     }
 
     public int countStudents(){
-        int count = 0;
-
-        for (Student s: this.findAllStudents()) {
-            count++;
-        }
-
-        return count;
+        return service.countStudents();
     }
     public int countAssignments(){
-        int count = 0;
-
-        for (Assignment a: this.findAllAssignments()) {
-            count++;
-        }
-
-        return count;
+        return service.countAssignments();
     }
 
     public int countGrades(){
@@ -52,46 +52,16 @@ public class Service {
 
     public Iterable<Grade> findAllGrades() { return gradeXmlRepo.findAll(); }
 
-    public int saveStudent(String id, String name, int group) {
-        Student student = new Student(id, name, group);
-        Student result = studentXmlRepo.save(student);
-
-        if (result == null) {
-            return 1;
-        }
-        return 0;
+    public Boolean saveStudent(String id, String name, int group) {
+        return service.saveStudent(id, name, group) == 0;
     }
 
-    public int saveAssignment(String id, String description, int deadline, int startWeek) {
-        Assignment assignment = new Assignment(id, description, deadline, startWeek);
-        Assignment result = assignmentXmlRepo.save(assignment);
-
-        if (result == null) {
-            return 1;
-        }
-        return 0;
+    public Boolean saveAssignment(String id, String description, int deadline, int startWeek) {
+       return service.saveAssignment(id, description, deadline, startWeek) == 0;
     }
 
     public int saveGrade(String idStudent, String idAssignment, double gradeVal, int deliveryWeek, String feedback) {
-        if (studentXmlRepo.findOne(idStudent) == null || assignmentXmlRepo.findOne(idAssignment) == null) {
-            return -1;
-        }
-        else {
-            int deadline = assignmentXmlRepo.findOne(idAssignment).getDeadlineWeek();
-
-            if (deliveryWeek - deadline > 2) {
-                gradeVal =  1;
-            } else if (deliveryWeek > deadline) {
-                gradeVal =  gradeVal - 2.5 * (deliveryWeek - deadline);
-            }
-            Grade grade = new Grade(new Pair<>(idStudent, idAssignment), gradeVal, deliveryWeek, feedback);
-            Grade result = gradeXmlRepo.save(grade);
-
-            if (result == null) {
-                return 1;
-            }
-            return 0;
-        }
+        return service.saveGrade(idStudent, idAssignment, gradeVal, deliveryWeek, feedback);
     }
 
     public int deleteStudent(String id) {
