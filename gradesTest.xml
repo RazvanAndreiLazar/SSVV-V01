@@ -5,14 +5,14 @@
         <SaptamanaPredare>7</SaptamanaPredare>
         <Feedback>good job</Feedback>
     </nota>
-    <nota IDStudent="2" IDTema="1">
+    <nota IDStudent="3" IDTema="3">
         <Nota>10.0</Nota>
         <SaptamanaPredare>7</SaptamanaPredare>
-        <Feedback>good job</Feedback>
+        <Feedback>good</Feedback>
     </nota>
-    <nota IDStudent="6" IDTema="1">
+    <nota IDStudent="10" IDTema="10">
         <Nota>10.0</Nota>
         <SaptamanaPredare>7</SaptamanaPredare>
-        <Feedback>good job</Feedback>
+        <Feedback>good</Feedback>
     </nota>
 </Entities>

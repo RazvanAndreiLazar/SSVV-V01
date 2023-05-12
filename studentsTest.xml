@@ -4,12 +4,12 @@
         <Nume>test</Nume>
         <Grupa>934</Grupa>
     </student>
-    <student ID="2">
+    <student ID="3">
         <Nume>test</Nume>
         <Grupa>934</Grupa>
     </student>
-    <student ID="6">
-        <Nume>test</Nume>
+    <student ID="10">
+        <Nume>Ana</Nume>
         <Grupa>934</Grupa>
     </student>
 </Entities>

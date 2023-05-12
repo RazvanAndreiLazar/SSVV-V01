@@ -1,5 +1,12 @@
 package ro.ubb.service.Mockito;
 
+import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import ro.ubb.domain.Assignment;
 import ro.ubb.domain.Grade;
 import ro.ubb.domain.Pair;
@@ -8,125 +15,179 @@ import ro.ubb.repository.AssignmentXMLRepository;
 import ro.ubb.repository.GradeXMLRepository;
 import ro.ubb.repository.StudentXMLRepository;
 import ro.ubb.service.Service;
+import ro.ubb.validation.AssignmentValidator;
+import ro.ubb.validation.GradeValidator;
+import ro.ubb.validation.StudentValidator;
+import ro.ubb.validation.Validator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.security.PublicKey;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.Locale;
 
 public class Service_Mock {
-    private StudentXMLRepository studentXmlRepo;
-    private AssignmentXMLRepository assignmentXmlRepo;
-    private GradeXMLRepository gradeXmlRepo;
+    protected AutoCloseable closeable;
+    @Mock
+    protected StudentXMLRepository studentXmlRepo;
+    @Mock
+    protected AssignmentXMLRepository assignmentXmlRepo;
+    @Mock
+    protected GradeXMLRepository gradeXmlRepo;
+    @InjectMocks
+    protected Service service;
 
-    private Service service;
+    private static final String STUDENTS_FILE = "studentsTest.xml";
+    private static final String ASSIGNMENTS_FILE = "assignmentsTest.xml";
+    private static final String GRADES_FILE = "gradesTest.xml";
 
-    public Service_Mock(Service service) {
-        this.service = service;
+    private static final String STUDENTS_MOCK_OBJ =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                    "<Entities>\n" +
+                    "    <student ID=\"1\">\n" +
+                    "        <Nume>test</Nume>\n" +
+                    "        <Grupa>934</Grupa>\n" +
+                    "    </student>\n" +
+                    "    <student ID=\"3\">\n" +
+                    "        <Nume>test</Nume>\n" +
+                    "        <Grupa>934</Grupa>\n" +
+                    "    </student>\n" +
+                    "</Entities>\n";
+
+    private static final String ASSIGNMENTS_MOCK_OBJ =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                    "<Entities>\n" +
+                    "    <tema ID=\"1\">\n" +
+                    "        <Descriere>wt</Descriere>\n" +
+                    "        <Deadline>9</Deadline>\n" +
+                    "        <Startline>7</Startline>\n" +
+                    "    </tema>\n" +
+                    "    <tema ID=\"3\">\n" +
+                    "        <Descriere>wt</Descriere>\n" +
+                    "        <Deadline>9</Deadline>\n" +
+                    "        <Startline>7</Startline>\n" +
+                    "    </tema>\n" +
+                    "</Entities>\n";
+
+    private static final String GRADES_MOCK_OBJ =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+                    "<Entities>\n" +
+                    "    <nota IDStudent=\"1\" IDTema=\"1\">\n" +
+                    "        <Nota>10.0</Nota>\n" +
+                    "        <SaptamanaPredare>7</SaptamanaPredare>\n" +
+                    "        <Feedback>good job</Feedback>\n" +
+                    "    </nota>\n" +
+                    "</Entities>\n";
+
+    public void initFiles() throws FileNotFoundException {
+        PrintWriter pwS = new PrintWriter(STUDENTS_FILE);
+        pwS.write(STUDENTS_MOCK_OBJ);
+        pwS.close();
+
+        PrintWriter pwA = new PrintWriter(ASSIGNMENTS_FILE);
+        pwA.write(ASSIGNMENTS_MOCK_OBJ);
+        pwA.close();
+
+        PrintWriter pwG = new PrintWriter(GRADES_FILE);
+        pwG.write(GRADES_MOCK_OBJ);
+        pwG.close();
     }
 
-    public Service_Mock(StudentXMLRepository studentXmlRepo, AssignmentXMLRepository assignmentXmlRepo, GradeXMLRepository gradeXmlRepo) {
-        this.studentXmlRepo = studentXmlRepo;
-        this.assignmentXmlRepo = assignmentXmlRepo;
-        this.gradeXmlRepo = gradeXmlRepo;
-    }
+    public Service_Mock() {
+        closeable = openMocks(this);
+        Validator<Student> studentValidator = new StudentValidator();
+        Validator<Assignment> assignmentValidator = new AssignmentValidator();
+        Validator<Grade> gradeValidator = new GradeValidator();
 
-    public int countStudents(){
-        return service.countStudents();
-    }
-    public int countAssignments(){
-        return service.countAssignments();
-    }
+        StudentXMLRepository fileRepository1 = new StudentXMLRepository(studentValidator, STUDENTS_FILE);
+        AssignmentXMLRepository fileRepository2 = new AssignmentXMLRepository(assignmentValidator, ASSIGNMENTS_FILE);
+        GradeXMLRepository fileRepository3 = new GradeXMLRepository(gradeValidator, GRADES_FILE);
 
-    public int countGrades(){
-        int count = 0;
+        service = new Service(fileRepository1, fileRepository2, fileRepository3);
 
-        for (Grade g: this.findAllGrades()) {
-            count++;
+        try {
+            initFiles();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
-
-        return count;
-    }
-    public Iterable<Student> findAllStudents() { return studentXmlRepo.findAll(); }
-
-    public Iterable<Assignment> findAllAssignments() { return assignmentXmlRepo.findAll(); }
-
-    public Iterable<Grade> findAllGrades() { return gradeXmlRepo.findAll(); }
-
-    public Boolean saveStudent(String id, String name, int group) {
-        return service.saveStudent(id, name, group) == 0;
     }
 
-    public Boolean saveAssignment(String id, String description, int deadline, int startWeek) {
-       return service.saveAssignment(id, description, deadline, startWeek) == 0;
+    @BeforeAll
+    void oneTimeSetUp() throws FileNotFoundException {
+        initFiles();
     }
+    @BeforeEach
+    void setUp() {
+        closeable = openMocks(this);
+        Validator<Student> studentValidator = new StudentValidator();
+        Validator<Assignment> assignmentValidator = new AssignmentValidator();
+        Validator<Grade> gradeValidator = new GradeValidator();
 
-    public int saveGrade(String idStudent, String idAssignment, double gradeVal, int deliveryWeek, String feedback) {
-        return service.saveGrade(idStudent, idAssignment, gradeVal, deliveryWeek, feedback);
-    }
+        StudentXMLRepository fileRepository1 = new StudentXMLRepository(studentValidator, STUDENTS_FILE);
+        AssignmentXMLRepository fileRepository2 = new AssignmentXMLRepository(assignmentValidator, ASSIGNMENTS_FILE);
+        GradeXMLRepository fileRepository3 = new GradeXMLRepository(gradeValidator, GRADES_FILE);
 
-    public int deleteStudent(String id) {
-        Student result = studentXmlRepo.delete(id);
+        service = new Service(fileRepository1, fileRepository2, fileRepository3);
 
-        if (result == null) {
-            return 0;
+        try {
+            initFiles();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        return 1;
     }
 
-    public int deleteAssignment(String id) {
-        Assignment result = assignmentXmlRepo.delete(id);
-
-        if (result == null) {
-            return 0;
-        }
-        return 1;
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+        initFiles();
     }
 
-    public int updateStudent(String id, String numeNou, int grupaNoua) {
-        Student studentNou = new Student(id, numeNou, grupaNoua);
-        Student result = studentXmlRepo.update(studentNou);
-
-        if (result == null) {
-            return 0;
-        }
-        return 1;
+    public void shouldAddStudent(String id, String name, int group) {
+        Student student = new Student(id, name, group);
+        when(studentXmlRepo.save(any())).thenReturn(student);
+        int result = service.saveStudent(id, name, group);
+        assertEquals(0, result);
     }
 
-    public int updateAssignment(String id, String newDescription, int newDeadline, int newStartWeek) {
-        Assignment newAssignment = new Assignment(id, newDescription, newDeadline, newStartWeek);
-        Assignment result = assignmentXmlRepo.update(newAssignment);
-
-        if (result == null) {
-            return 0;
-        }
-        return 1;
+    public void shouldAddAssignment(String id, String description, int deadlineWeek, int startWeek) {
+        Assignment assignment = new Assignment(id, description, deadlineWeek, startWeek);
+        when(assignmentXmlRepo.save(any())).thenReturn(assignment);
+        int result = service.saveAssignment(id, description, deadlineWeek, startWeek);
+        assertEquals(0, result);
     }
 
-    public int extendDeadline(String id, int numberOfWeeks) {
-        Assignment assignment = assignmentXmlRepo.findOne(id);
-
-        if (assignment != null) {
-            LocalDate date = LocalDate.now();
-            WeekFields weekFields = WeekFields.of(Locale.getDefault());
-            int currentWeek = date.get(weekFields.weekOfWeekBasedYear());
-
-            if (currentWeek >= 39) {
-                currentWeek = currentWeek - 39;
-            } else {
-                currentWeek = currentWeek + 12;
-            }
-
-            if (currentWeek <= assignment.getDeadlineWeek()) {
-                int deadlineNou = assignment.getDeadlineWeek() + numberOfWeeks;
-                return updateAssignment(assignment.getID(), assignment.getDescription(), deadlineNou, assignment.getStartWeek());
-            }
-        }
-        return 0;
+    public void shouldAddGrade(String studentId, String assignmentId, int value, int deliveryWeek, String feedback) {
+        Grade grade = new Grade(new Pair<>(studentId, assignmentId), value, deliveryWeek, feedback);
+        when(gradeXmlRepo.save(any())).thenReturn(grade);
+        int result = service.saveGrade(studentId, assignmentId, value, deliveryWeek, feedback);
+        assertEquals(0, result);
     }
 
-    public void createStudentFile(String idStudent, String idAssignment) {
-        Grade grade = gradeXmlRepo.findOne(new Pair<>(idStudent, idAssignment));
+    public void shouldNotAddStudent(String id, String name, int group) {
+        Student student = new Student(id, name, group);
+        when(studentXmlRepo.save(any())).thenReturn(student);
+        int result = service.saveStudent(id, name, group);
+        assertEquals(1, result);
+    }
 
-        gradeXmlRepo.createFile(grade);
+    public void shouldNotAddAssignment(String id, String description, int deadlineWeek, int startWeek) {
+        Assignment assignment = new Assignment(id, description, deadlineWeek, startWeek);
+        when(assignmentXmlRepo.save(any())).thenReturn(assignment);
+        int result = service.saveAssignment(id, description, deadlineWeek, startWeek);
+        assertEquals(1, result);
+    }
+
+    public void shoulNotdAddGrade(String studentId, String assignmentId, int value, int deliveryWeek, String feedback) {
+        Grade grade = new Grade(new Pair<>(studentId, assignmentId), value, deliveryWeek, feedback);
+        when(gradeXmlRepo.save(any())).thenReturn(grade);
+        int result = service.saveGrade(studentId, assignmentId, value, deliveryWeek, feedback);
+        assertEquals(1, result);
     }
 }
